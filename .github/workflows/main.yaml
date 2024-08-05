@@ -1,4 +1,4 @@
-name: CI/CD for react Node app 
+name: Build and Deploy Docker Container
 
 on:
   push:
@@ -6,49 +6,34 @@ on:
       - master
 
 jobs:
-  # Build Job
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Install Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18.x
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16' # Specify the Node.js version you need
 
-      - name: Install Dependencies
-        run: |
-          cd todo
-          npm install
+    - name: Install dependencies
+      run: npm install
 
-      - name: Build Project
-        run: |
-          cd todo
-          npm run build
+    - name: Build application
+      run: npm run build # Adjust if you have a different build command
 
-      - name: Upload artifact to enable deployment
-        uses: actions/upload-artifact@v3
-        with:
-          name: poduction file
-          path: ./dist
+    - name: Build Docker image
+      run: docker build . -t ghcr.io/${{ github.repository }}/my-node-app:latest
 
-  # Deploy Job
-  deploy:
-   
-    needs: build
-    
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: poduction file
-          path: ./todo/build
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.KEY }} #this is the key of the access token
-          publish_dir: ./todo/build
+    - name: Push Docker image to GitHub Container Registry
+      run: docker push ghcr.io/${{ github.repository }}/my-node-app:latest
+
