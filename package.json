@@ -1,12 +1,12 @@
 {
-  "name": "shreyanshzevo-test-package",
+  "name": "@shreyanshrathore/github-ci-cd",
   "version": "1.0.1",
   "description": "this is second version of the package to check the versioning of the packages",
   "main": "src/index.ts",
   "scripts": {
     "dev": "nodemon src/index.ts",
     "build": "npx tsc",
-    "test": "jest"
+    "test": "jest --detectOpenHandles"
   },
   "author": "shreyansh",
   "license": "ISC",
